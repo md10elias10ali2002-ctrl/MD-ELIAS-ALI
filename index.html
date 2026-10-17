@@ -196,21 +196,23 @@
         <div class="contact-glass glass reveal">
           <form id="contactForm" novalidate>
             <div class="input-group">
-              <input type="text" id="name" required placeholder=" ">
+              <input type="text" id="name" name="name" required placeholder=" ">
               <label for="name">Full Name</label>
             </div>
             <div class="input-group">
-              <input type="email" id="email" required placeholder=" ">
+              <input type="email" id="email" name="email" required placeholder=" ">
               <label for="email">Email Address</label>
             </div>
             <div class="input-group">
-              <textarea id="message" rows="4" required placeholder=" "></textarea>
+              <textarea id="message" name="message" rows="4" required placeholder=" "></textarea>
               <label for="message">Your Message</label>
             </div>
+            <input type="hidden" name="_subject" value="New website contact message">
             <button type="submit" class="btn-submit" id="submitBtn">
               <span class="btn-text">Send Message</span>
               <span class="spinner" id="spinner"></span>
             </button>
+            <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
           </form>
         </div>
       </div>

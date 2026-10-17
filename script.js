@@ -320,6 +320,8 @@ const contactForm = document.getElementById('contactForm');
 const submitBtn = document.getElementById('submitBtn');
 const spinner = document.getElementById('spinner');
 const btnText = submitBtn ? submitBtn.querySelector('.btn-text') : null;
+const formStatus = document.getElementById('formStatus');
+const contactEndpoint = 'https://formsubmit.co/ajax/md10elias10ali2002@gmail.com';
 
 /**
  * Basic email format validation using a regex pattern.
@@ -344,15 +346,10 @@ function showInputError(input) {
 }
 
 /**
- * Handle the form submission:
- * 1. Prevent default page reload
- * 2. Validate all fields
- * 3. Show loading spinner
- * 4. Simulate async submission (setTimeout)
- * 5. Show success state and reset form
+ * Validate and submit the form through FormSubmit's AJAX endpoint.
  */
 if (contactForm) {
-  contactForm.addEventListener('submit', (e) => {
+  contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const nameInput = document.getElementById('name');
@@ -389,25 +386,57 @@ if (contactForm) {
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     btnText.textContent = 'Sending...';
+    formStatus.textContent = '';
+    formStatus.className = 'form-status';
 
-    // --- Simulate an async network request (replace with real fetch) ---
-    setTimeout(() => {
-      // Success state
+    try {
+      const formData = new FormData(contactForm);
+      formData.set('_replyto', emailValue);
+      const response = await fetch(contactEndpoint, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Object.fromEntries(formData)),
+      });
+      let result;
+
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error('The email service returned an invalid response. Please try again.');
+      }
+
+      if (!response.ok || (result.success !== 'true' && result.success !== true)) {
+        throw new Error(result.message || 'The message could not be sent. Please try again.');
+      }
+
       submitBtn.classList.remove('loading');
       btnText.textContent = 'Message Sent ✓';
       submitBtn.style.background =
         'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)';
-
-      // Reset form fields
+      formStatus.textContent =
+        'Your message was submitted. If this is the first submission, check your inbox for FormSubmit’s activation email.';
+      formStatus.classList.add('form-status-success');
       contactForm.reset();
 
-      // Restore button after 2.5 seconds
       setTimeout(() => {
         submitBtn.disabled = false;
         btnText.textContent = 'Send Message';
         submitBtn.style.background = '';
       }, 2500);
-    }, 1800);
+
+    } catch (error) {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+      btnText.textContent = 'Send Message';
+      formStatus.textContent =
+        error instanceof Error
+          ? error.message
+          : 'The message could not be sent. Please try again.';
+      formStatus.classList.add('form-status-error');
+    }
   });
 }
 
